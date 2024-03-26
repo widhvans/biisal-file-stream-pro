@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 bot_name = "Proton File To Link"
-bisal_channel = "https://telegram.me/bisal_files"
-bisal_grp = "https://t.me/+PA8OPL2Zglk3MDM1"
+bisal_channel = "https://telegram.me/joinnowearn"
+bisal_grp = "https://t.me/joinnowearn"
 
 class Var(object):
     MULTI_CLIENT = False
