@@ -1,16 +1,32 @@
-pyrogram==2.0.106
-pyrofork==2.2.11
-tgcrypto<=1.2.3
-aiohttp<=3.8.1
-python-dotenv<=0.20.0
-motor
-aiofiles
-dnspython
-apscheduler
-requests
-psutil
-pyromod
-colorama
-jinja2
-Flask<= 3.0.0
-gunicorn<= 21.2.0
+
+# Telegram API और क्रिप्टोग्राफी
+pyrogram>=2.0.106
+tgcrypto>=1.2.5  # नवीनतम स्थिर वर्जन
+
+# असिंक्रोनस HTTP और फाइल हैंडलिंग
+aiohttp>=3.9.3  # पुराना वर्जन 3.8.1 त्रुटि दे रहा था, नवीनतम उपयोग करें
+aiofiles>=23.2.1
+
+# पर्यावरण चर और डेटाबेस
+python-dotenv>=1.0.1
+motor>=3.3.2
+dnspython>=2.6.1  # MongoDB SRV URL के लिए
+
+# शेड्यूलिंग और HTTP रिक्वेस्ट्स
+apscheduler>=3.10.4
+requests>=2.31.0
+
+# सिस्टम मॉनिटरिंग और Pyrogram एक्सटेंशन
+psutil>=5.9.8
+pyromod>=3.0.5
+
+# टर्मिनल और टेम्पलेटिंग
+colorama>=0.4.6
+jinja2>=3.1.3
+
+# वेब सर्वर
+Flask>=3.0.2
+gunicorn>=22.0.0  # नवीनतम स्थिर वर्जन
+
+# वैकल्पिक: Pyrogram का फोर्क (अगर उपयोग हो रहा हो)
+# pyrofork>=2.2.11
