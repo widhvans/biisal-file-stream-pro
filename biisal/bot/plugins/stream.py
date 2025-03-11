@@ -44,7 +44,7 @@ async def private_receive_handler(c: Client, m: Message):
             if user.status == "kicked":
                 await c.send_message(
                     chat_id=m.chat.id,
-                    text="You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ Support [Support](https://t.me/joinnowearn) They Wɪʟʟ Hᴇʟᴘ Yᴏᴜ**",
+                    text="You are banned!\n\n  **Cᴏɴᴛᴀᴄᴛ Support [Support](https://t.me/joinnowearn) They Wɪʟʟ Hᴇʟᴅ Yᴏᴜ**",
                     disable_web_page_preview=True,
                 )
                 return
@@ -77,8 +77,13 @@ async def private_receive_handler(c: Client, m: Message):
         return await m.reply(Var.BAN_ALERT)
     try:
         log_msg = await m.forward(chat_id=Var.BIN_CHANNEL)
+        # URL को छोटा और वैध बनाया
         stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
+        
+        # URL की वैधता की जाँच
+        if not stream_link.startswith(('http://', 'https://')) or not online_link.startswith(('http://', 'https://')):
+            raise ValueError("Invalid URL: Must start with http:// or https://")
 
         await log_msg.reply_text(
             text=f"**RᴇQᴜᴇꜱᴛᴇᴅ ʙʏ :** [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n**Uꜱᴇʀ ɪᴅ :** `{m.from_user.id}`\n**Stream ʟɪɴᴋ :** {stream_link}",
@@ -112,9 +117,12 @@ async def private_receive_handler(c: Client, m: Message):
             text=f"Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {str(e.x)}s from [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n\n**𝚄𝚜𝚎𝚛 𝙸𝙳 :** `{str(m.from_user.id)}`",
             disable_web_page_preview=True,
         )
+    except ValueError as ve:
+        print(f"Error in private_receive_handler: {str(ve)}")
+        await m.reply_text("Invalid URL configuration. Please contact support.")
     except Exception as e:
         print(f"Error in private_receive_handler: {str(e)}")
-        await m.reply_text("An error occurred while processing your request.")
+        await m.reply_text("An error occurred while processing your request: " + str(e))
 
 @StreamBot.on_message(
     filters.channel
@@ -135,6 +143,11 @@ async def channel_receive_handler(bot, broadcast):
         log_msg = await broadcast.forward(chat_id=Var.BIN_CHANNEL)
         stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
+        
+        # URL की वैधता की जाँच
+        if not stream_link.startswith(('http://', 'https://')) or not online_link.startswith(('http://', 'https://')):
+            raise ValueError("Invalid URL: Must start with http:// or https://")
+
         await log_msg.reply_text(
             text=f"**Channel Name:** `{broadcast.chat.title}`\n**CHANNEL ID:** `{broadcast.chat.id}`\n**Rᴇǫᴜᴇsᴛ ᴜʀʟ:** {stream_link}",
             quote=True,
@@ -160,6 +173,8 @@ async def channel_receive_handler(bot, broadcast):
             text=f"GOT FLOODWAIT OF {str(w.x)}s FROM {broadcast.chat.title}\n\n**CHANNEL ID:** `{str(broadcast.chat.id)}`",
             disable_web_page_preview=True,
         )
+    except ValueError as ve:
+        print(f"Error in channel_receive_handler: {str(ve)}")
     except Exception as e:
         await bot.send_message(
             chat_id=Var.BIN_CHANNEL,
