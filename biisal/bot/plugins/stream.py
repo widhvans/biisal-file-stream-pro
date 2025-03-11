@@ -1,5 +1,3 @@
-#(c) Adarsh-Goel
-#(c) @biisal
 import os
 import asyncio
 from asyncio import TimeoutError
@@ -10,12 +8,9 @@ from biisal.vars import Var
 from urllib.parse import quote_plus
 from pyrogram import filters, Client
 from pyrogram.errors import FloodWait, UserNotParticipant
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-#from utils_bot import get_shortlink
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo  # WebAppInfo इंपोर्ट जोड़ा
 
-from biisal.utils.file_properties import get_name, get_hash, get_media_file_size
 db = Database(Var.DATABASE_URL, Var.name)
-
 
 MY_PASS = os.environ.get("MY_PASS", None)
 pass_dict = {}
@@ -30,7 +25,6 @@ msg_text = """<b>‣ ʏᴏᴜʀ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ! 😎
 🔺 <a href="{}">𝗪𝗔𝗧𝗖𝗛 𝗢𝗡𝗟𝗜𝗡𝗘</a>
 
 ‣ Join <a href="https://t.me/joinnowearn">Updates Channel</a></b>"""
-
 
 @StreamBot.on_message(
     (filters.private)
@@ -58,7 +52,7 @@ async def private_receive_handler(c: Client, m: Message):
             await c.send_photo(
                 chat_id=m.chat.id,
                 photo="https://telegra.ph/file/b484da71a92fb31545fe8.jpg",
-                caption=""""<b>Hᴇʏ ᴛʜᴇʀᴇ!\n\nPʟᴇᴀsᴇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ ᴛᴏ ᴜsᴇ ᴍᴇ ! 😊\n\nDᴜᴇ ᴛᴏ sᴇʀᴠᴇʀ ᴏᴠᴇʀʟᴏᴀᴅ, ᴏɴʟʏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ sᴜʙsᴄʀɪʙᴇʀs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ !</b>""",
+                caption="""<b>Hᴇʏ ᴛʜᴇʀᴇ!\n\nPʟᴇᴀsᴇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ ᴛᴏ ᴜsᴇ ᴍᴇ ! 😊\n\nDᴜᴇ ᴛᴏ sᴇʀᴠᴇʀ ᴏᴠᴇʀʟᴏᴀᴅ, ᴏɴʟʏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ sᴜʙsᴄʀɪʙᴇʀs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ !</b>""",
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
@@ -103,14 +97,12 @@ async def private_receive_handler(c: Client, m: Message):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton(
-                            "sᴛʀᴇᴀᴍ 🔺", url=stream_link
-                        ),  # Stream Link
+                        InlineKeyboardButton("sᴛʀᴇᴀᴍ 🔺", url=stream_link),
                         InlineKeyboardButton("ᴅᴏᴡɴʟᴏᴀᴅ 🔻", url=online_link),
                     ],
                     [InlineKeyboardButton("Watch on Web 🌐", web_app=WebAppInfo(url=stream_link))],
                 ]
-            ),  # Download Link
+            ),
         )
     except FloodWait as e:
         print(f"Sleeping for {str(e.x)}s")
@@ -120,7 +112,6 @@ async def private_receive_handler(c: Client, m: Message):
             text=f"Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {str(e.x)}s from [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n\n**𝚄𝚜𝚎𝚛 𝙸𝙳 :** `{str(m.from_user.id)}`",
             disable_web_page_preview=True,
         )
-
 
 @StreamBot.on_message(
     filters.channel
@@ -178,3 +169,28 @@ async def channel_receive_handler(bot, broadcast):
             f"Cᴀɴ'ᴛ Eᴅɪᴛ Bʀᴏᴀᴅᴄᴀsᴛ Mᴇssᴀɢᴇ!\nEʀʀᴏʀ:  **Give me edit permission in updates and bin Channel!{e}**"
         )
 
+# हेल्पर फंक्शन्स जो पिछले कोड में थे, लेकिन यहाँ दिखाई नहीं दिए। इन्हें भी शामिल करना जरूरी है।
+def get_name(msg):
+    if msg.document:
+        return msg.document.file_name
+    elif msg.video:
+        return msg.video.file_name
+    elif msg.audio:
+        return msg.audio.file_name
+    elif msg.photo:
+        return "photo.jpg"
+    return "Unknown"
+
+def get_hash(msg):
+    return getattr(msg, "file_unique_id", "no_hash")
+
+def get_media_file_size(m):
+    if m.document:
+        return m.document.file_size
+    elif m.video:
+        return m.video.file_size
+    elif m.audio:
+        return m.audio.file_size
+    elif m.photo:
+        return m.photo[-1].file_size  # सबसे बड़ी फोटो का साइज
+    return 0
