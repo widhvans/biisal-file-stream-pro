@@ -77,13 +77,12 @@ async def private_receive_handler(c: Client, m: Message):
         return await m.reply(Var.BAN_ALERT)
     try:
         log_msg = await m.forward(chat_id=Var.BIN_CHANNEL)
-        # URL को छोटा और वैध बनाया
         stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         
         # URL की वैधता की जाँच
         if not stream_link.startswith(('http://', 'https://')) or not online_link.startswith(('http://', 'https://')):
-            raise ValueError("Invalid URL: Must start with http:// or https://")
+            raise ValueError(f"Invalid URL generated: {stream_link}")
 
         await log_msg.reply_text(
             text=f"**RᴇQᴜᴇꜱᴛᴇᴅ ʙʏ :** [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n**Uꜱᴇʀ ɪᴅ :** `{m.from_user.id}`\n**Stream ʟɪɴᴋ :** {stream_link}",
@@ -146,7 +145,7 @@ async def channel_receive_handler(bot, broadcast):
         
         # URL की वैधता की जाँच
         if not stream_link.startswith(('http://', 'https://')) or not online_link.startswith(('http://', 'https://')):
-            raise ValueError("Invalid URL: Must start with http:// or https://")
+            raise ValueError(f"Invalid URL generated: {stream_link}")
 
         await log_msg.reply_text(
             text=f"**Channel Name:** `{broadcast.chat.title}`\n**CHANNEL ID:** `{broadcast.chat.id}`\n**Rᴇǫᴜᴇsᴛ ᴜʀʟ:** {stream_link}",
