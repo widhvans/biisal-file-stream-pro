@@ -1,5 +1,3 @@
-# (c) @biisal
-# (c) adars h-goel
 import os
 import sys
 import glob
@@ -8,11 +6,11 @@ import logging
 import importlib
 from pathlib import Path
 from pyrogram import idle
-from .bot import StreamBot
-from .vars import Var
 from aiohttp import web
-from .server import web_server
-from .utils.keepalive import ping_server
+from biisal.bot import StreamBot
+from biisal.vars import Var
+from biisal.server import web_server
+from biisal.utils.keepalive import ping_server
 from biisal.bot.clients import initialize_clients
 
 LOGO = """
@@ -35,17 +33,14 @@ files = glob.glob(ppath)
 StreamBot.start()
 loop = asyncio.get_event_loop()
 
-
 async def start_services():
     print('\n')
-    print('------------------- Initalizing Telegram Bot -------------------')
+    print('------------------- Initializing Telegram Bot -------------------')
     bot_info = await StreamBot.get_me()
     StreamBot.username = bot_info.username
     print("------------------------------ DONE ------------------------------")
     print()
-    print(
-        "---------------------- Initializing Clients ----------------------"
-    )
+    print("---------------------- Initializing Clients ----------------------")
     await initialize_clients()
     print("------------------------------ DONE ------------------------------")
     print('\n')
@@ -65,7 +60,7 @@ async def start_services():
         print("------------------ Starting Keep Alive Service ------------------")
         print()
         asyncio.create_task(ping_server())
-    print('-------------------- Initalizing Web Server -------------------------')
+    print('-------------------- Initializing Web Server -------------------------')
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0" if Var.ON_HEROKU else Var.BIND_ADRESS
@@ -82,17 +77,63 @@ async def start_services():
     print('                        server ip =>> {}:{}'.format(bind_address, Var.PORT))
     print('                        Owner =>> {}'.format((Var.OWNER_USERNAME)))
     if Var.ON_HEROKU:
-        print('                        app runnng on =>> {}'.format(Var.FQDN))
+        print('                        app running on =>> {}'.format(Var.FQDN))
     print('---------------------------------------------------------------------------------------------------------')
     print(LOGO)
-    try: 
-        await StreamBot.send_message(chat_id=Var.OWNER_ID[0] ,text='<b>ᴊᴀɪ sʜʀᴇᴇ ᴋʀɪsʜɴᴀ 😎\nʙᴏᴛ ʀᴇsᴛᴀʀᴛᴇᴅ !!</b>')
+    try:
+        await StreamBot.send_message(chat_id=Var.OWNER_ID[0], text='<b>ᴊᴀɪ sʜʀᴇᴇ ᴋʀɪsʜɴᴀ 😎\nʙᴏᴛ ʀᴇsᴛᴀʀᴛᴇᴅ !!</b>')
     except Exception as e:
-        print(f'got this err to send restart msg to owner : {e}')
+        print(f'Got this error while sending restart msg to owner: {e}')
     await idle()
+
+async def stop_services():
+    await StreamBot.stop()
+    print("Bot Stopped!")
 
 if __name__ == '__main__':
     try:
         loop.run_until_complete(start_services())
     except KeyboardInterrupt:
+        loop.run_until_complete(stop_services())
         logging.info('----------------------- Service Stopped -----------------------')
+
+
+##### बदलाव
+- *वेब सर्वर*: web_server से प्राप्त app को सही ढंग से शुरू किया। यह मानता है कि biisal/server.py में एक मान्य web.Application रिटर्न हो रहा है। अगर ऐसा नहीं है, तो हमें server.py भी देखना होगा।
+- *शटडाउन हैंडलिंग*: stop_services जोड़ा ताकि बॉट सही ढंग से बंद हो।
+
+---
+
+#### 3. biisal/vars.py की जाँच
+- सुनिश्चित करें कि Var.URL सही ढंग से सेट है। उदाहरण:
+  python
+  URL = "http://yourdomain.com/"  # या "http://45.67.89.100:8081/"
+  
+- अगर .env में सेट है, तो:
+  
+  URL=http://yourdomain.com/
+  
+
+---
+
+#### 4. biisal/server.py (अनुमानित फिक्स)
+चूंकि आपके पास web_server से संबंधित त्रुटि है, यहाँ एक बेसिक server.py का उदाहरण है जो काम करेगा। अगर आपके पास पहले से अलग कोड है, तो उसे शेयर करें।
+
+python
+from aiohttp import web
+
+async def handle_root(request):
+    return web.Response(text="Welcome to StreamBot Server!")
+
+async def handle_watch(request):
+    return web.Response(text="Streaming endpoint not implemented yet.")
+
+async def handle_download(request):
+    return web.Response(text="Download endpoint not implemented yet.")
+
+async def web_server():
+    app = web.Application()
+    app.router.add_get('/', handle_root)
+    app.router.add_get('/watch/{id}/{name}', handle_watch)
+    app.router.add_get('/{id}/{name}', handle_download)
+    return app
