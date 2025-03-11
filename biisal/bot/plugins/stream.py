@@ -21,7 +21,7 @@ msg_text = """<b>‣ ʏᴏᴜʀ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ! 😎
 ‣ Fɪʟᴇ ɴᴀᴍᴇ : <i>{}</i>
 ‣ Fɪʟᴇ ꜱɪᴢᴇ : {}
 
-🔻 <a href="{}">𝗙𝗔𝗦𝗧 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗</a>
+🔻 <a href="{}">𝗙𝗔𝗦𝗧 𝗗𝗢�_WN𝗟𝗢𝗔𝗗</a>
 🔺 <a href="{}">𝗪𝗔𝗧𝗖𝗛 𝗢𝗡𝗟𝗜𝗡𝗘</a>
 
 ‣ Join <a href="https://t.me/joinnowearn">Updates Channel</a></b>"""
@@ -53,17 +53,17 @@ async def private_receive_handler(c: Client, m: Message):
                 chat_id=m.chat.id,
                 photo="https://telegra.ph/file/b484da71a92fb31545fe8.jpg",
                 caption="""<b>Hᴇʏ ᴛʜᴇʀᴇ!\n\nPʟᴇᴀsᴇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ ᴛᴏ ᴜsᴇ ᴍᴇ ! 😊\n\nDᴜᴇ ᴛᴏ sᴇʀᴠᴇʀ ᴏᴠᴇʀʟᴏᴀᴅ, ᴏɴʟʏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ sᴜʙsᴄʀɪʙᴇʀs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ !</b>""",
-                    reply_markup=InlineKeyboardMarkup(
+                reply_markup=InlineKeyboardMarkup(
+                    [
                         [
-                            [
-                                InlineKeyboardButton(
-                                    "Jᴏɪɴ ɴᴏᴡ 🚩", url=f"https://t.me/{Var.UPDATES_CHANNEL}"
-                                )
-                            ]
+                            InlineKeyboardButton(
+                                "Jᴏɪɴ ɴᴏᴡ 🚩", url=f"https://t.me/{Var.UPDATES_CHANNEL}"
+                            )
                         ]
-                    ),
-                )
-                return
+                    ]
+                ),
+            )
+            return
         except Exception as e:
             await m.reply_text(str(e))
             await c.send_message(
@@ -77,7 +77,6 @@ async def private_receive_handler(c: Client, m: Message):
         return await m.reply(Var.BAN_ALERT)
     try:
         log_msg = await m.forward(chat_id=Var.BIN_CHANNEL)
-        # URL को छोटा और वैध बनाया
         stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
 
@@ -167,9 +166,8 @@ async def channel_receive_handler(bot, broadcast):
             text=f"**#ERROR_TRACKEBACK:** `{e}`",
             disable_web_page_preview=True,
         )
-        print(f"Cᴀɴ'ᴛ Eᴅɪᴛ Bʀᴏᴀᴅᴄᴀsᴛ Mᴇssᴀɢᴇ!\nEʀʀᴏʀ:  **Give me edit permission in updates and bin Channel!{e}**")
+        print(f"Can’t Edit Broadcast Message!\nError: **Give me edit permission in updates and bin Channel! {e}**")
 
-# हेल्पर फंक्शन्स
 def get_name(msg):
     if msg.document:
         return msg.document.file_name or "Unknown"
