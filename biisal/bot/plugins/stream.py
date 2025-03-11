@@ -8,7 +8,7 @@ from biisal.vars import Var
 from urllib.parse import quote_plus
 from pyrogram import filters, Client
 from pyrogram.errors import FloodWait, UserNotParticipant
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo  # WebAppInfo इंपोर्ट जोड़ा
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 db = Database(Var.DATABASE_URL, Var.name)
 
@@ -53,19 +53,19 @@ async def private_receive_handler(c: Client, m: Message):
                 chat_id=m.chat.id,
                 photo="https://telegra.ph/file/b484da71a92fb31545fe8.jpg",
                 caption="""<b>Hᴇʏ ᴛʜᴇʀᴇ!\n\nPʟᴇᴀsᴇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ ᴛᴏ ᴜsᴇ ᴍᴇ ! 😊\n\nDᴜᴇ ᴛᴏ sᴇʀᴠᴇʀ ᴏᴠᴇʀʟᴏᴀᴅ, ᴏɴʟʏ ᴏᴜʀ ᴄʜᴀɴɴᴇʟ sᴜʙsᴄʀɪʙᴇʀs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ !</b>""",
-                reply_markup=InlineKeyboardMarkup(
-                    [
+                    reply_markup=InlineKeyboardMarkup(
                         [
-                            InlineKeyboardButton(
-                                "Jᴏɪɴ ɴᴏᴡ 🚩", url=f"https://t.me/{Var.UPDATES_CHANNEL}"
-                            )
+                            [
+                                InlineKeyboardButton(
+                                    "Jᴏɪɴ ɴᴏᴡ 🚩", url=f"https://t.me/{Var.UPDATES_CHANNEL}"
+                                )
+                            ]
                         ]
-                    ]
-                ),
-            )
-            return
+                    ),
+                )
+                return
         except Exception as e:
-            await m.reply_text(e)
+            await m.reply_text(str(e))
             await c.send_message(
                 chat_id=m.chat.id,
                 text="**Sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ Wʀᴏɴɢ. Cᴏɴᴛᴀᴄᴛ ᴍʏ Support** [Support](https://t.me/joinnowearn)",
@@ -73,12 +73,13 @@ async def private_receive_handler(c: Client, m: Message):
             )
             return
     ban_chk = await db.is_banned(int(m.from_user.id))
-    if ban_chk == True:
+    if ban_chk:
         return await m.reply(Var.BAN_ALERT)
     try:
         log_msg = await m.forward(chat_id=Var.BIN_CHANNEL)
-        stream_link = f"{Var.URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        online_link = f"{Var.URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+        # URL को छोटा और वैध बनाया
+        stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
+        online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
 
         await log_msg.reply_text(
             text=f"**RᴇQᴜᴇꜱᴛᴇᴅ ʙʏ :** [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n**Uꜱᴇʀ ɪᴅ :** `{m.from_user.id}`\n**Stream ʟɪɴᴋ :** {stream_link}",
@@ -112,6 +113,9 @@ async def private_receive_handler(c: Client, m: Message):
             text=f"Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {str(e.x)}s from [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n\n**𝚄𝚜𝚎𝚛 𝙸𝙳 :** `{str(m.from_user.id)}`",
             disable_web_page_preview=True,
         )
+    except Exception as e:
+        print(f"Error in private_receive_handler: {str(e)}")
+        await m.reply_text("An error occurred while processing your request.")
 
 @StreamBot.on_message(
     filters.channel
@@ -122,18 +126,16 @@ async def private_receive_handler(c: Client, m: Message):
 )
 async def channel_receive_handler(bot, broadcast):
     if int(broadcast.chat.id) in Var.BAN_CHNL:
-        print(
-            "chat trying to get straming link is found in BAN_CHNL,so im not going to give stram link"
-        )
+        print("chat trying to get straming link is found in BAN_CHNL,so im not going to give stram link")
         return
     ban_chk = await db.is_banned(int(broadcast.chat.id))
-    if (int(broadcast.chat.id) in Var.BANNED_CHANNELS) or (ban_chk == True):
+    if (int(broadcast.chat.id) in Var.BANNED_CHANNELS) or ban_chk:
         await bot.leave_chat(broadcast.chat.id)
         return
     try:
         log_msg = await broadcast.forward(chat_id=Var.BIN_CHANNEL)
-        stream_link = f"{Var.URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        online_link = f"{Var.URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+        stream_link = f"{Var.URL}watch/{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
+        online_link = f"{Var.URL}{log_msg.id}/{quote_plus(get_name(log_msg)[:30])}"
         await log_msg.reply_text(
             text=f"**Channel Name:** `{broadcast.chat.title}`\n**CHANNEL ID:** `{broadcast.chat.id}`\n**Rᴇǫᴜᴇsᴛ ᴜʀʟ:** {stream_link}",
             quote=True,
@@ -165,18 +167,16 @@ async def channel_receive_handler(bot, broadcast):
             text=f"**#ERROR_TRACKEBACK:** `{e}`",
             disable_web_page_preview=True,
         )
-        print(
-            f"Cᴀɴ'ᴛ Eᴅɪᴛ Bʀᴏᴀᴅᴄᴀsᴛ Mᴇssᴀɢᴇ!\nEʀʀᴏʀ:  **Give me edit permission in updates and bin Channel!{e}**"
-        )
+        print(f"Cᴀɴ'ᴛ Eᴅɪᴛ Bʀᴏᴀᴅᴄᴀsᴛ Mᴇssᴀɢᴇ!\nEʀʀᴏʀ:  **Give me edit permission in updates and bin Channel!{e}**")
 
-# हेल्पर फंक्शन्स जो पिछले कोड में थे, लेकिन यहाँ दिखाई नहीं दिए। इन्हें भी शामिल करना जरूरी है।
+# हेल्पर फंक्शन्स
 def get_name(msg):
     if msg.document:
-        return msg.document.file_name
+        return msg.document.file_name or "Unknown"
     elif msg.video:
-        return msg.video.file_name
+        return msg.video.file_name or "Unknown"
     elif msg.audio:
-        return msg.audio.file_name
+        return msg.audio.file_name or "Unknown"
     elif msg.photo:
         return "photo.jpg"
     return "Unknown"
@@ -192,5 +192,5 @@ def get_media_file_size(m):
     elif m.audio:
         return m.audio.file_size
     elif m.photo:
-        return m.photo[-1].file_size  # सबसे बड़ी फोटो का साइज
+        return m.photo[-1].file_size
     return 0
